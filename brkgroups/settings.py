@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'app',  # <-- ADICIONE ESTA LINHA
 ]
 
 MIDDLEWARE = [
@@ -76,10 +77,10 @@ WSGI_APPLICATION = 'brkgroups.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'brk_zapdb',      # Ex: grupos_zap_db
-        'USER': 'bot_admin',    # Ex: postgres
+        'NAME': 'brk_zapdb',
+        'USER': 'bot_admin',
         'PASSWORD': 'admin',
-        'HOST': 'localhost',              # Ou o endereço do seu servidor DB
+        'HOST': 'localhost',
         'PORT': '5432',
     }
 }
