@@ -1,7 +1,11 @@
+from django.contrib import admin
 from django.urls import path
 from app import views
 
 urlpatterns = [
+    # Rota para a interface de administração do Django
+    path('admin/', admin.site.urls),
+
     # Rota para a página principal que renderiza o HTML no servidor
     path('', views.group_list, name='group_list'),
 

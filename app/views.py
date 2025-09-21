@@ -1,6 +1,7 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 from .models import Group, Category
+from django.db.models import F
 
 
 # View para renderizar a página principal com os grupos
@@ -18,11 +19,22 @@ def group_list(request):
         'groups': groups,
         'categories': categories
     }
-    # O caminho agora é 'index.html', sem o 'app/'
     return render(request, 'index.html', context)
 
 
-# View de API para retornar os grupos em formato JSON
+def redirect_and_count(request, group_id):
+    """
+    Incrementa a contagem de visualizações de um grupo e redireciona
+    para o link do WhatsApp.
+    """
+    group = get_object_or_404(Group, pk=group_id)
+    # Usamos F() para evitar condições de corrida e fazer o update no banco de dados
+    group.views = F('views') + 1
+    group.save(update_fields=['views'])
+    return redirect(group.whatsapp_link)
+
+
+# View de API para retornar os grupos em formato JSON (se necessário no futuro)
 def group_list_api(request):
     """
     Retorna uma lista de todos os grupos em formato JSON.
@@ -37,4 +49,3 @@ def group_list_api(request):
         'views'
     )
     return JsonResponse(list(groups), safe=False)
-

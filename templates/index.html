@@ -11,26 +11,43 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
+            background-color: #111827; /* bg-gray-900 */
         }
         .modal-bg {
             background-color: rgba(0, 0, 0, 0.7);
         }
+        /* Adiciona um efeito de fade-in suave */
+        .card-enter {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeIn 0.5s forwards;
+        }
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .category-filter.active {
+            color: #34D399; /* text-green-400 */
+            font-weight: bold;
+        }
     </style>
 </head>
-<body class="bg-gray-900 text-white">
+<body class="text-white">
 
     <!-- Cabeçalho -->
-    <header class="bg-gray-800 shadow-lg sticky top-0 z-50">
+    <header class="bg-gray-800 shadow-lg sticky top-0 z-40">
         <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
             <h1 class="text-2xl font-bold text-green-400">GruposZap</h1>
             <div class="flex items-center space-x-4">
                 <div class="relative hidden md:block">
-                    <input type="text" placeholder="Buscar grupos..." class="bg-gray-700 text-white placeholder-gray-400 rounded-full py-2 px-4 focus:outline-none focus:ring-2 focus:ring-green-400">
+                    <input type="text" id="search-input" placeholder="Buscar grupos..." class="bg-gray-700 text-white placeholder-gray-400 rounded-full py-2 px-4 w-64 focus:outline-none focus:ring-2 focus:ring-green-400">
                     <svg class="w-5 h-5 absolute right-3 top-2.5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                 </div>
-                <a href="/admin" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full transition duration-300">
+                <a href="/admin/" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full transition duration-300">
                     Área do Admin
                 </a>
             </div>
@@ -41,54 +58,50 @@
     <main class="container mx-auto px-6 py-12">
         <h2 class="text-4xl font-bold text-center mb-12">Encontre os Melhores Grupos</h2>
 
-        <!-- Grid de Grupos -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-            <!-- Exemplo de Card de Grupo 1 -->
-            <div class="bg-gray-800 rounded-lg shadow-xl overflow-hidden transform hover:scale-105 transition-transform duration-300 cursor-pointer" onclick="openModal('Amizades sem barreiras', 'Amizade', 'https://placehold.co/100x100/7F56D9/FFFFFF?text=A', 'Este é o grupo perfeito para você que busca novas amizades, sem se importar com aparências ou distâncias. Aqui, todos são bem-vindos para compartilhar momentos, desabafar e fazer amigos para a vida toda.', '# Regras\n1. Respeito acima de tudo.\n2. Proibido conteúdo adulto.\n3. Sem spam ou links de outros grupos.')">
-                <div class="p-6 flex flex-col items-center text-center">
-                    <img class="w-24 h-24 rounded-full mb-4 border-4 border-gray-700" src="https://placehold.co/100x100/7F56D9/FFFFFF?text=A" alt="Ícone do Grupo">
-                    <h3 class="font-bold text-lg mb-1">Amizades sem barreiras</h3>
-                    <span class="text-sm bg-purple-500 text-white px-2 py-1 rounded-full">Amizade</span>
-                    <button class="mt-4 w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 rounded-lg transition duration-300">
-                        Ver Detalhes
-                    </button>
-                </div>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 items-start">
+            <!-- Grid de Grupos (Conteúdo Principal) -->
+            <div id="groups-grid" class="md:col-span-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                {% if groups %}
+                    {% for group in groups %}
+                    <div class="group-card bg-gray-800 rounded-lg shadow-xl overflow-hidden transform hover:scale-105 transition-transform duration-300 cursor-pointer card-enter"
+                         style="animation-delay: {% widthratio forloop.counter0 1 50 %}ms;"
+                         data-name="{{ group.name }}"
+                         data-category="{{ group.category.name|default:'Sem Categoria' }}"
+                         data-img-src="{{ group.image_url }}"
+                         data-description="{{ group.description }}"
+                         data-link-id="{{ group.id }}">
+                        <div class="p-6 flex flex-col items-center text-center">
+                            <img class="w-24 h-24 rounded-full mb-4 border-4 border-gray-700 object-cover" src="{{ group.image_url }}" alt="Ícone do Grupo {{ group.name }}" onerror="this.onerror=null;this.src='https://placehold.co/100x100/374151/FFFFFF?text=?';">
+                            <h3 class="font-bold text-lg mb-1">{{ group.name }}</h3>
+                            {% if group.category %}
+                            <span class="text-sm bg-purple-600 text-white px-2 py-1 rounded-full">{{ group.category.name }}</span>
+                            {% endif %}
+                             <p class="text-xs text-gray-400 mt-2">Entradas: {{ group.views }}</p>
+                            <button class="mt-4 w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 rounded-lg transition duration-300 open-modal-btn">
+                                Ver Detalhes
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="col-span-full text-center text-gray-400">Nenhum grupo encontrado. Adicione alguns na área de administração!</p>
+                {% endif %}
             </div>
 
-            <!-- Exemplo de Card de Grupo 2 -->
-            <div class="bg-gray-800 rounded-lg shadow-xl overflow-hidden transform hover:scale-105 transition-transform duration-300 cursor-pointer" onclick="openModal('Figurinhas & Memes', 'Figurinhas', 'https://placehold.co/100x100/D92D20/FFFFFF?text=F', 'Coleção de figurinhas e memes atualizada diariamente. Peça as figurinhas que quiser e compartilhe as suas com a galera. A zoeira não tem fim!', '# Regras\n1. Apenas figurinhas e memes.\n2. Proibido ofensas.')">
-                <div class="p-6 flex flex-col items-center text-center">
-                    <img class="w-24 h-24 rounded-full mb-4 border-4 border-gray-700" src="https://placehold.co/100x100/D92D20/FFFFFF?text=F" alt="Ícone do Grupo">
-                    <h3 class="font-bold text-lg mb-1">Figurinhas & Memes</h3>
-                    <span class="text-sm bg-red-500 text-white px-2 py-1 rounded-full">Figurinhas</span>
-                    <button class="mt-4 w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 rounded-lg transition duration-300">
-                        Ver Detalhes
-                    </button>
-                </div>
-            </div>
-
-             <!-- Adicione mais cards conforme necessário -->
-             <div class="bg-gray-800 rounded-lg shadow-xl overflow-hidden transform hover:scale-105 transition-transform duration-300 cursor-pointer" onclick="openModal('Fãs de Games', 'Jogos', 'https://placehold.co/100x100/027A48/FFFFFF?text=G', 'Para todos os gamers! Encontre parceiros para jogar, discutir lançamentos e compartilhar suas melhores jogadas. PC, console ou mobile, todos são bem-vindos!', '# Regras\n1. Sem spoilers de jogos recém-lançados.\n2. Respeite a plataforma de cada um.')">
-                <div class="p-6 flex flex-col items-center text-center">
-                    <img class="w-24 h-24 rounded-full mb-4 border-4 border-gray-700" src="https://placehold.co/100x100/027A48/FFFFFF?text=G" alt="Ícone do Grupo">
-                    <h3 class="font-bold text-lg mb-1">Fãs de Games</h3>
-                    <span class="text-sm bg-green-700 text-white px-2 py-1 rounded-full">Jogos</span>
-                    <button class="mt-4 w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 rounded-lg transition duration-300">
-                        Ver Detalhes
-                    </button>
-                </div>
-            </div>
-
-            <div class="bg-gray-800 rounded-lg shadow-xl overflow-hidden transform hover:scale-105 transition-transform duration-300 cursor-pointer" onclick="openModal('Vagas de Emprego TI', 'Outros', 'https://placehold.co/100x100/026AA2/FFFFFF?text=TI', 'Networking e divulgação de vagas para a área de Tecnologia da Informação. Apenas vagas sérias. Ajude e seja ajudado a crescer na carreira!', '# Regras\n1. Apenas vagas de TI.\n2. Proibido spam ou cursos.')">
-                <div class="p-6 flex flex-col items-center text-center">
-                    <img class="w-24 h-24 rounded-full mb-4 border-4 border-gray-700" src="https://placehold.co/100x100/026AA2/FFFFFF?text=TI" alt="Ícone do Grupo">
-                    <h3 class="font-bold text-lg mb-1">Vagas de Emprego TI</h3>
-                    <span class="text-sm bg-blue-500 text-white px-2 py-1 rounded-full">Outros</span>
-                    <button class="mt-4 w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 rounded-lg transition duration-300">
-                        Ver Detalhes
-                    </button>
-                </div>
-            </div>
+            <!-- Sidebar de Categorias -->
+            <aside class="md:col-span-1 bg-gray-800 p-6 rounded-lg self-start sticky top-24 h-fit">
+                <h3 class="text-xl font-bold mb-4 border-b border-gray-700 pb-2">Categorias</h3>
+                <ul class="space-y-3 mt-4">
+                    <li><a href="#" class="category-filter block hover:text-green-400 transition-colors duration-200 active" data-category="all">Todas</a></li>
+                    {% if categories %}
+                        {% for category in categories %}
+                        <li>
+                            <a href="#" class="category-filter block hover:text-green-400 transition-colors duration-200" data-category="{{ category.name }}">{{ category.name }}</a>
+                        </li>
+                        {% endfor %}
+                    {% endif %}
+                </ul>
+            </aside>
         </div>
     </main>
 
@@ -96,17 +109,10 @@
     <div id="group-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-bg hidden">
         <div class="bg-gray-800 rounded-lg shadow-2xl w-full max-w-lg mx-auto transform transition-all duration-300 scale-95 opacity-0" id="modal-content">
             <div class="p-8 text-center">
-                <img id="modal-img" class="w-32 h-32 rounded-full mb-4 border-4 border-gray-700 mx-auto" src="" alt="Ícone do Grupo">
+                <img id="modal-img" class="w-32 h-32 rounded-full mb-4 border-4 border-gray-700 mx-auto object-cover" src="" alt="Ícone do Grupo">
                 <h3 id="modal-title" class="font-bold text-3xl mb-2"></h3>
                 <span id="modal-category" class="text-sm bg-gray-700 text-green-400 px-3 py-1 rounded-full font-semibold"></span>
-
                 <p id="modal-description" class="text-gray-300 my-6 text-left"></p>
-
-                <div id="modal-rules" class="text-left bg-gray-900 p-4 rounded-lg border border-gray-700 mb-6">
-                    <h4 class="font-bold text-lg mb-2">Regras do Grupo</h4>
-                    <pre class="text-gray-300 whitespace-pre-wrap font-sans"></pre>
-                </div>
-
                 <a id="modal-link" href="#" target="_blank" class="block w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg transition duration-300 text-lg">
                     ENTRAR NO GRUPO
                 </a>
@@ -119,24 +125,16 @@
         </div>
     </div>
 
-
     <script>
         const modal = document.getElementById('group-modal');
         const modalContent = document.getElementById('modal-content');
-        const modalTitle = document.getElementById('modal-title');
-        const modalCategory = document.getElementById('modal-category');
-        const modalImg = document.getElementById('modal-img');
-        const modalDescription = document.getElementById('modal-description');
-        const modalRules = document.querySelector('#modal-rules pre');
-        const modalLink = document.getElementById('modal-link');
 
-        function openModal(title, category, imgSrc, description, rules, link = '#') {
-            modalTitle.textContent = title;
-            modalCategory.textContent = category;
-            modalImg.src = imgSrc;
-            modalDescription.textContent = description;
-            modalRules.textContent = rules;
-            modalLink.href = link;
+        function openModal(card) {
+            document.getElementById('modal-title').textContent = card.dataset.name;
+            document.getElementById('modal-category').textContent = card.dataset.category;
+            document.getElementById('modal-img').src = card.dataset.imgSrc;
+            document.getElementById('modal-description').textContent = card.dataset.description;
+            document.getElementById('modal-link').href = `/group/${card.dataset.linkId}/join/`;
 
             modal.classList.remove('hidden');
             setTimeout(() => {
@@ -146,16 +144,66 @@
         }
 
         function closeModal() {
-             modalContent.classList.add('scale-95', 'opacity-0');
+            modalContent.classList.add('scale-95', 'opacity-0');
             setTimeout(() => {
                 modal.classList.add('hidden');
             }, 300);
         }
-        modal.addEventListener('click', (event) => {
-            if (event.target === modal) {
-                closeModal();
-            }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            const allCards = document.querySelectorAll('.group-card');
+
+            // Abrir modal
+            allCards.forEach(card => {
+                card.addEventListener('click', () => openModal(card));
+            });
+
+            // Fechar modal clicando fora
+            modal.addEventListener('click', (event) => {
+                if (event.target === modal) {
+                    closeModal();
+                }
+            });
+
+            // Lógica de busca por texto
+            const searchInput = document.getElementById('search-input');
+            searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                allCards.forEach(card => {
+                    const groupName = card.dataset.name.toLowerCase();
+                    if (groupName.includes(searchTerm)) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+
+            // Lógica de filtro por categoria
+            const categoryFilters = document.querySelectorAll('.category-filter');
+            categoryFilters.forEach(filter => {
+                filter.addEventListener('click', (e) => {
+                    e.preventDefault();
+
+                    // Remove a classe ativa de todos os filtros
+                    categoryFilters.forEach(f => f.classList.remove('active'));
+                    // Adiciona a classe ativa ao clicado
+                    e.target.classList.add('active');
+
+                    const selectedCategory = e.target.dataset.category;
+
+                    allCards.forEach(card => {
+                        if (selectedCategory === 'all' || card.dataset.category === selectedCategory) {
+                            card.style.display = 'block';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+                });
+            });
         });
     </script>
 </body>
 </html>
+
